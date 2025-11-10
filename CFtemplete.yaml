@@ -1,0 +1,37 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  CloudFormation template to create the IAM Role and Policies required for Amazon Q Business 
+  Data Accessor integration (ISV Role) in Monitory Dev environment.
+
+Resources:
+  MonitoryQAccessRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: MonitoryQAccessRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: qbusiness.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: QBusinessDataAccessPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: QBusinessAPIAccess
+                Effect: Allow
+                Action:
+                  - qbusiness:SearchRelevantContent
+                  - qbusiness:BatchPutDocument
+                  - qbusiness:BatchDeleteDocument
+                  - sso-oauth:CreateTokenWithIAM
+                  - kms:Decrypt
+                  - sts:SetContext
+                Resource: "*"
+
+Outputs:
+  MonitoryQAccessRoleArn:
+    Description: ARN of the IAM Role created for Q Business integration
+    Value: !GetAtt MonitoryQAccessRole.Arn
