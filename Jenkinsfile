@@ -8,7 +8,7 @@ pipeline {
         CLUSTER_NAME     = "mysample-app-cluster"
         SERVICE_NAME     = "mysample-app-cluster-service"
         IMAGE_TAG        = "${env.BUILD_NUMBER}"
-        AWS_CREDS        = "aws-creds"    // Jenkins AWS Credentials ID
+        AWS_CREDS        = "aws-creds"
     }
 
     stages {
@@ -64,10 +64,10 @@ pipeline {
 
     post {
         success {
-            echo "Deployment Successful! 🚀 Image Tag: $IMAGE_TAG"
+            echo "Deployment Successful"
         }
         failure {
-            echo "Deployment Failed ❌"
+            echo "Deployment Failed"
         }
     }
 }
