@@ -5,11 +5,11 @@ on:
     branches: ["main"]
 
 env:
-  AWS_REGION: ${{ secrets.AWS_REGION }}
-  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-  ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
-  ECS_SERVICE: ${{ secrets.ECS_SERVICE }}
+  AWS_REGION: us-east-1
+  AWS_ACCOUNT_ID: 194526776035
+  ECR_REPOSITORY: mysample_appecr
+  ECS_CLUSTER: mysample-app-cluster
+  ECS_SERVICE: mysample-app-cluster-service
 
 jobs:
   deploy:
@@ -24,7 +24,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: us-east-1
 
       - name: Login to Amazon ECR
         run: |
