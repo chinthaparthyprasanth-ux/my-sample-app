@@ -7,11 +7,16 @@ pipeline {
         ECR_REPO       = "mysample_appecr"
         IMAGE_TAG      = "${BUILD_NUMBER}"
         ECR_URL        = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+
+        CLUSTER_NAME   = "mysample-app-cluster"
+        SERVICE_NAME   = "mysample-app-cluster-service"
+        TASK_FAMILY    = "mysample-app-cluster"
+        CONTAINER_NAME = "mysample-app"
     }
 
     stages {
 
-        stage('Checkout Code') {
+        stage('Checkout') {
             steps {
                 checkout scm
             }
@@ -43,14 +48,45 @@ pipeline {
                 """
             }
         }
+
+        stage('Register New Task Definition') {
+            steps {
+                withAWS(credentials: 'aws-creds', region: "${AWS_REGION}") {
+                    bat """
+                    aws ecs describe-task-definition --task-definition %TASK_FAMILY% --query taskDefinition > taskdef.json
+
+                    powershell -Command "(Get-Content taskdef.json) ^
+                    -replace '\"\\"image\\":.*?\"\",', '\\"image\\": \\"%ECR_URL%/%ECR_REPO%:%IMAGE_TAG%\\",' ^
+                    | Set-Content taskdef-updated.json"
+
+                    aws ecs register-task-definition --cli-input-json file://taskdef-updated.json
+                    """
+                }
+            }
+        }
+
+        stage('Deploy to ECS Service') {
+            steps {
+                withAWS(credentials: 'aws-creds', region: "${AWS_REGION}") {
+                    bat """
+                    $revision=(aws ecs describe-task-definition --task-definition %TASK_FAMILY% --query "taskDefinition.revision" --output text)
+
+                    aws ecs update-service ^
+                        --cluster %CLUSTER_NAME% ^
+                        --service %SERVICE_NAME% ^
+                        --task-definition %TASK_FAMILY%:$revision
+                    """
+                }
+            }
+        }
     }
 
     post {
         success {
-            echo "Successfully built and pushed image to ECR."
+            echo "Deployment Successful!"
         }
         failure {
-            echo "Pipeline failed."
+            echo "Deployment Failed!"
         }
     }
 }
