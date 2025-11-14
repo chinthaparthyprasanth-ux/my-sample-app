@@ -41,21 +41,25 @@ pipeline {
 
         stage('Push to ECR') {
             steps {
-                sh """
-                    docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG}
-                """
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: "${AWS_CREDS}"]]) {
+                    sh """
+                        docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG}
+                    """
+                }
             }
         }
 
         stage('Deploy to ECS') {
             steps {
-                sh """
-                    aws ecs update-service \
-                        --cluster ${CLUSTER_NAME} \
-                        --service ${SERVICE_NAME} \
-                        --force-new-deployment \
-                        --region ${AWS_REGION}
-                """
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: "${AWS_CREDS}"]]) {
+                    sh """
+                        aws ecs update-service \
+                            --cluster ${CLUSTER_NAME} \
+                            --service ${SERVICE_NAME} \
+                            --force-new-deployment \
+                            --region ${AWS_REGION}
+                    """
+                }
             }
         }
 
