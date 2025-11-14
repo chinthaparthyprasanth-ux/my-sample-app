@@ -8,7 +8,7 @@ pipeline {
         CLUSTER_NAME     = "mysample-app-cluster"
         SERVICE_NAME     = "mysample-app-cluster-service"
         IMAGE_TAG        = "${BUILD_NUMBER}"
-        AWS_CREDS        = "aws-creds"
+        AWS_CREDS        = "aws creds"
     }
 
     stages {
